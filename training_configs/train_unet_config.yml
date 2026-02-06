@@ -1,0 +1,54 @@
+data_json: "./dieases.json"
+pretrained_model_path: "xxx" #"/mnt/rds/VipinRDS/VipinRDS/users/cxs965/QK/MRGen/train_unet/PRGen_1024_512_two_260106-092452/checkpoint_8000"
+vae_path: "/xxx" #"/mnt/rds/VipinRDS/VipinRDS/users/cxs965/QK/MRGen/train_unet/PRGen_1024_512_two_260106-092452/checkpoint_8000/vae" #"/mnt/rds/VipinRDS/VipinRDS/users/cxs965/QK/MRGen/train_vae/PRGen_two_channels_260105-215529/checkpoint_15000"
+logdir: "./xxx"
+
+# Validation sample logger
+validation_sample_logger:
+  num_inference_steps: 50
+  guidance_scale: 7.5
+
+# Training parameters
+gradient_accumulation_steps: 4
+train_batch_size: 24
+val_batch_size: 1
+train_steps: 200000
+validation_steps: 500
+seed: 6666
+mixed_precision: "fp16"
+
+# Learning rate settings
+learning_rate: 1.0e-5
+lr_scheduler: "constant_with_warmup"
+lr_warmup_steps: 500
+
+# Optimizer settings
+use_8bit_adam: true
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_weight_decay: 0.01
+adam_epsilon: 1.0e-8
+max_grad_norm: 1.0
+
+# Checkpointing
+checkpointing_steps: 1000
+
+# VAE settings
+scaling_factor: 0.18215
+
+# EMA settings
+use_ema: true
+ema_decay: 0.9999
+
+# Mask-weighted loss settings
+mask_weight_fg: 5.0
+mask_weight_bg: 1.0
+
+# DataLoader settings
+num_workers: 4
+
+# Memory optimization
+enable_gradient_checkpointing: False
+
+# Logging
+log_interval: 100

@@ -1,0 +1,21 @@
+name: "PRGen"
+logdir: "./train_vae/PRGen_1024_512"
+pretrained_model_path: "XXX/train_vae/xxx"
+gradient_accumulation_steps: 4
+train_steps: 200000
+train_batch_size: 2
+val_batch_size: 1
+validation_steps: 500
+checkpointing_steps: 5000
+kld_weight: 1e-4
+learning_rate: 5e-5
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_weight_decay: 1e-2
+adam_epsilon: 1e-8
+continue_train_path: None
+# continue_train_path: "./ckpt/vae"
+lr_scheduler: "cosine"
+# lr_scheduler: "linear"
+lr_warmup_steps: 0
+in_channels: 2

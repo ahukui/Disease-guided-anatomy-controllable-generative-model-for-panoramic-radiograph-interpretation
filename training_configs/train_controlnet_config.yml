@@ -1,0 +1,25 @@
+data_json: "./dieases.json"
+pretrained_model_path: "xx"
+logdir: "./xx"
+validation_sample_logger:
+    num_inference_steps: 50
+    guidance_scale: 7.5
+gradient_accumulation_steps: 1
+train_batch_size: 24
+val_batch_size: 1
+train_steps: 200000
+validation_steps: 500
+checkpointing_steps: 10000
+seed: 6666
+mixed_precision: 'bf16' #'no' #'bf16' # 'no'
+learning_rate: 1e-5
+lr_scheduler: "cosine"
+#lr_scheduler: "constant"
+#lr_scheduler: "linear"
+use_8bit_adam: True
+# unet_learning_rate: 1e-5  # Lower LR for UNet (already pretrained)
+# controlnet_learning_rate: 1e-5 # Higher LR for ControlNet
+# scale_lr: false
+# lr_scheduler: "cosine"
+# lr_warmup_steps: 1000
+# max_grad_norm: 1.0
