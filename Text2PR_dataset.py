@@ -167,121 +167,6 @@ class PRGenDataset(Dataset):
         """NEAREST interpolation for mask (avoid edge mixing)."""
         return resize(m, (self.image_h, self.image_w), order=0, preserve_range=True)
 
-
-class PRGenDatasetWithAugmentation(PRGenDataset):
-    """Extended dataset with data augmentation for training."""
-    
-    def __init__(
-        self,
-        data_path: str,
-        mode: str = 'train',
-        from_json: bool = True,
-        image_size: Tuple[int, int] = (512, 1024),
-        low_percentile: float = 10.0,
-        high_percentile: float = 90.0,
-        train_ratio: float = 0.99,
-        # Augmentation parameters
-        enable_augmentation: bool = True,
-        horizontal_flip_prob: float = 0.5,
-        brightness_range: Tuple[float, float] = (0.9, 1.1),
-        contrast_range: Tuple[float, float] = (0.9, 1.1),
-    ):
-        super().__init__(
-            data_path=data_path,
-            mode=mode,
-            from_json=from_json,
-            image_size=image_size,
-            low_percentile=low_percentile,
-            high_percentile=high_percentile,
-            train_ratio=train_ratio,
-        )
-        
-        self.enable_augmentation = enable_augmentation and (mode == 'train')
-        self.horizontal_flip_prob = horizontal_flip_prob
-        self.brightness_range = brightness_range
-        self.contrast_range = contrast_range
-
-    def __getitem__(self, index: int) -> dict:
-        item = self.data_list[index]
-        img_path = item["images"].replace("OriExtractedPNG", "ExtractedDicom").replace('.png', '.dcm')
-        mask_path = item["images"].replace("OriExtractedPNG", "ExtractedPNGMask")
-        skeleton_path = item["images"].replace("OriExtractedPNG", "centerline_results")
-        text = item["content"]
-
-        try:
-            # Load DICOM image
-            ds = pydicom.dcmread(img_path)
-            image = ds.pixel_array.astype(np.float32)
-            if image.ndim == 3:
-                image = image[:, :, 0]
-            
-            # Load mask
-            mask = Image.open(mask_path).convert("L")
-            mask = np.array(mask, dtype=np.float32)
-            
-            # Load skeleton
-            skeleton = Image.open(skeleton_path).convert("L")
-            skeleton = np.array(skeleton, dtype=np.float32)
-            
-        except Exception as e:
-            #print(f"[WARN] Failed to load {img_path}: {e}")
-            return self.__getitem__(random.randint(0, len(self) - 1))
-
-        # Apply augmentation BEFORE normalization (on raw pixel values)
-        if self.enable_augmentation:
-            image, mask, skeleton = self.apply_augmentation(image, mask, skeleton)
-
-        # Normalize
-        img = self.percentile_normalize(image)
-        mask = self.normalize_mask(mask)
-        skeleton = self.normalize_mask(skeleton)
-
-        # Resize
-        img = self.resize_image(img)
-        mask = self.resize_mask(mask)
-        skeleton = self.resize_mask(skeleton)
-
-        # Convert to tensors
-        img = torch.tensor(img, dtype=torch.float32)
-        mask = torch.tensor(mask, dtype=torch.float32)
-        skeleton = torch.tensor(skeleton, dtype=torch.float32)
-
-        final_name = os.path.basename(img_path)
-
-        return {
-            "image": img.unsqueeze(0),
-            "prompt": text,
-            "skeleton": skeleton.unsqueeze(0),
-            "mask": mask.unsqueeze(0),
-            "image_path": final_name,
-        }
-
-    def apply_augmentation(
-        self, 
-        image: np.ndarray, 
-        mask: np.ndarray, 
-        skeleton: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Apply data augmentation to image, mask, and skeleton."""
-        
-        # Horizontal flip
-        if random.random() < self.horizontal_flip_prob:
-            image = np.fliplr(image).copy()
-            mask = np.fliplr(mask).copy()
-            skeleton = np.fliplr(skeleton).copy()
-        
-        # Brightness adjustment (only on image)
-        brightness_factor = random.uniform(*self.brightness_range)
-        image = image * brightness_factor
-        
-        # Contrast adjustment (only on image)
-        contrast_factor = random.uniform(*self.contrast_range)
-        mean_val = np.mean(image)
-        image = (image - mean_val) * contrast_factor + mean_val
-        
-        return image, mask, skeleton
-
-
 # =============================================================================
 # Utility functions
 # =============================================================================
@@ -354,7 +239,7 @@ if __name__ == '__main__':
     
     # JSON mode test
     train_dataset = PRGenDataset(
-        data_path="./SixDieasesPatientInf.json",
+        data_path="./PatientInf.json",
         mode='train',
         low_percentile=10.0,
         high_percentile=90.0,
