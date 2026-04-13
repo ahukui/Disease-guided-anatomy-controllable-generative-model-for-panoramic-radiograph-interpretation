@@ -220,17 +220,8 @@ def generate_images_distributed(
             print(f"[Rank {rank}] Processing sample {local_idx}/{len(local_data)}")
 
         text = prompts["content"]
-        mask_path = prompts["images"].replace("OriExtractedPNG", "ExtractedPNGMask")
-        skeleton_path = prompts["images"].replace("OriExtractedPNG", "centerline_results")
-
-        mask = Image.open(mask_path).convert("L")
-        mask = np.array(mask, dtype=np.float32)
-        cv2.imwrite(
-            os.path.join(output_dir, f"rank{rank}_{global_idx}_mask.png"), 
-            mask
-        )
-
-
+        skeleton_path = prompts["images"]
+        
         # Load skeleton
         skeleton = Image.open(skeleton_path).convert("L")
         skeleton = np.array(skeleton, dtype=np.float32)
