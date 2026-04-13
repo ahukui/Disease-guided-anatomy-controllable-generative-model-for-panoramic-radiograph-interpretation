@@ -73,8 +73,12 @@ In the final stage, `train_text_mask.py` is used to finetune the diffusion model
 ```bash
 CUDA_VISIBLE_DEVICES=0,1,2,3 accelerate launch --main_process_port 12345 train_text_mask.py
 ```
+
 ## Inference 
-While finishing training, using Inference.py for infernce. 
+
+Once training is complete, you can use `Inference.py` to perform multi-GPU inference for panoramic radiograph generation.
+
+Pretrained model weights are available at [Google Drive](https://drive.google.com/drive/folders/1khFkvEWGQ0D869hOqaZgbRSjbBte9hN2?usp=drive_link).
 ```bash
 CUDA_VISIBLE_DEVICES=0,1,2,3 python your_script.py \
   --checkpoint_path ./checkpoint \
